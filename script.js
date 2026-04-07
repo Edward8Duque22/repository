@@ -1,50 +1,48 @@
-// Base de datos local
-const BD_KEY = 'mi_repo_creativo_v1';
+const DB_NAME = 'mi_archivo_data_v2';
 
 function obtenerProyectos() {
-    return JSON.parse(localStorage.getItem(BD_KEY)) || [];
+    return JSON.parse(localStorage.getItem(DB_NAME)) || [];
 }
 
 function guardarProyectos(datos) {
-    localStorage.setItem(BD_KEY, JSON.stringify(datos));
+    localStorage.setItem(DB_NAME, JSON.stringify(datos));
 }
 
-// Seguridad
-function verificarSesion() {
-    if (!sessionStorage.getItem('sesion_activa')) {
-        window.location.href = 'login.html';
-    }
-}
-
-// Lógica de carga (Base64 para fotos locales)
-function procesarNuevoProyecto() {
+function agregarProyecto() {
     const titulo = document.getElementById('titulo').value;
     const fecha = document.getElementById('fecha').value;
-    const fotoFile = document.getElementById('foto-local').files[0];
+    const foto = document.getElementById('foto').files[0];
 
-    if (!titulo || !fecha || !fotoFile) {
-        alert("¡Hey! Te falta el título, la fecha o la foto 📸");
-        return;
-    }
+    if(!titulo || !fecha || !foto) return alert("Por favor llena los campos y selecciona una foto.");
 
     const reader = new FileReader();
     reader.onload = function(e) {
         const nuevo = {
             id: Date.now(),
-            titulo,
-            fecha,
-            img: e.target.result,
-            repo: document.getElementById('url-repo').value || '#',
-            live: document.getElementById('url-live').value || '#',
-            desc: document.getElementById('descripcion').value || '',
+            titulo, fecha, img: e.target.result,
+            repo: document.getElementById('repo').value || '#',
+            live: document.getElementById('live').value || '#',
+            desc: document.getElementById('desc').value || '',
             visible: true
         };
-
-        const proyectos = obtenerProyectos();
-        proyectos.push(nuevo);
-        guardarProyectos(proyectos);
-        alert("¡Proyecto guardado con éxito! 🎉");
+        const db = obtenerProyectos();
+        db.push(nuevo);
+        guardarProyectos(db);
         window.location.href = 'index.html';
     };
-    reader.readAsDataURL(fotoFile);
+    reader.readAsDataURL(foto);
+}
+
+function toggleVisible(id) {
+    const db = obtenerProyectos().map(p => p.id === id ? {...p, visible: !p.visible} : p);
+    guardarProyectos(db);
+    location.reload();
+}
+
+function eliminarProyecto(id) {
+    if(confirm("¿Seguro que quieres borrar este proyecto?")) {
+        const db = obtenerProyectos().filter(p => p.id !== id);
+        guardarProyectos(db);
+        location.reload();
+    }
 }
