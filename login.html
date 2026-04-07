@@ -22,8 +22,8 @@
         function validar() {
             const pass = document.getElementById('clave').value;
             if (!pass) return alert("Escribe la contraseña");
+
             
-            // Hash generado para: Neiva0228
             const hashCorrecto = "c0e1cd8fc8386315b37205f95cd4918b8820715968f4b0c6bd910ce0c78045ba";
             const hashIngresado = CryptoJS.SHA256(pass).toString();
 
