@@ -2,40 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Control - Mis Archivos</title>
+    <title>Panel de Administración</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header><h1>🛠 Mi Panel de Gestión</h1></header>
+    <header>
+        <a href="index.html" style="float: left; color: white; text-decoration: none;">⬅ Volver</a>
+        <h1>🛠 Gestionar Repositorio</h1>
+    </header>
 
-    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 20px;">
-        <input type="text" id="titulo" placeholder="Título del proyecto" style="width:95%; padding:10px; margin-bottom:10px;">
-        <input type="date" id="fecha" style="width:95%; padding:10px; margin-bottom:10px;">
-        <input type="file" id="foto" accept="image/*" style="margin-bottom:10px;">
-        <input type="text" id="repo" placeholder="Link Repositorio" style="width:95%; padding:10px; margin-bottom:10px;">
-        <input type="text" id="live" placeholder="Link Vista Previa" style="width:95%; padding:10px; margin-bottom:10px;">
-        <textarea id="desc" placeholder="Descripción..." style="width:95%; padding:10px; height:60px;"></textarea>
-        <button onclick="agregarProyecto()" style="width:100%; padding:15px; background:#6c5ce7; color:white; border:none; border-radius:10px; cursor:pointer;">🚀 Publicar Ahora</button>
-    </div>
+    <section class="form-container">
+        <div class="form-group">
+            <input type="text" id="titulo" placeholder="Título del proyecto">
+            <input type="date" id="fecha">
+            <label>Imagen de portada (Local):</label>
+            <input type="file" id="foto" accept="image/*">
+            <input type="text" id="repo" placeholder="URL del Repositorio (GitHub/Drive)">
+            <input type="text" id="live" placeholder="URL del Proyecto (Nube)">
+            <textarea id="desc" placeholder="Descripción del proyecto..."></textarea>
+            <button class="btn-main" onclick="agregarProyecto()">🚀 Publicar en el Archivo</button>
+        </div>
+    </section>
 
-    <h2 style="text-align:center; margin-top:40px;">Gestión de Archivos</h2>
+    <h2 style="text-align: center;">Tus Publicaciones</h2>
     <div id="lista-admin" class="grid"></div>
 
     <script src="script.js"></script>
     <script>
-        const datos = obtenerDatos();
-        const lista = document.getElementById('lista-admin');
-        datos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(p => {
-            lista.innerHTML += `
-                <div class="card ${p.visible ? '' : 'hidden'}">
-                    <img src="${p.img}">
-                    <div class="card-body">
-                        <h3>${p.titulo}</h3>
-                        <button onclick="toggleVisible(${p.id})">${p.visible ? 'Ocultar 👁️' : 'Mostrar 🕶️'}</button>
-                        <button onclick="eliminar(${p.id})" style="color:red">Borrar 🗑️</button>
-                    </div>
-                </div>`;
+        document.addEventListener('DOMContentLoaded', () => {
+            const datos = obtenerDatos();
+            const lista = document.getElementById('lista-admin');
+            
+            datos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(p => {
+                lista.innerHTML += `
+                    <div class="card ${p.visible ? '' : 'hidden-card'}">
+                        <img src="${p.img}">
+                        <div class="card-body">
+                            <h3>${p.titulo}</h3>
+                            <div class="admin-actions">
+                                <button class="btn-toggle" onclick="toggleVisible(${p.id})">${p.visible ? 'Ocultar 👁️' : 'Mostrar 🕶️'}</button>
+                                <button class="btn-delete" onclick="eliminar(${p.id})">Borrar 🗑️</button>
+                            </div>
+                        </div>
+                    </div>`;
+            });
         });
     </script>
 </body>
