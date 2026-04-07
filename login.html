@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso Seguro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div style="height: 100vh; display: flex; align-items: center; justify-content: center;">
+        <div class="box-form" style="margin: 0; width: 100%;">
+            <h2>🔐 Panel Privado</h2>
+            <p>Introduce tu clave maestra</p>
+            <input type="password" id="clave" placeholder="Contraseña">
+            <button class="btn btn-live" style="width: 100%;" onclick="entrar()">Entrar</button>
+            <br><br>
+            <a href="index.html" style="color: #999;">Volver al inicio</a>
+        </div>
+    </div>
+
+    <script>
+        function entrar() {
+            const clave = document.getElementById('clave').value;
+            if (clave === "1234") { // <--- CAMBIA TU CLAVE AQUÍ
+                sessionStorage.setItem('sesion_activa', 'true');
+                window.location.href = 'admin.html';
+            } else {
+                alert("Clave incorrecta ❌");
+            }
+        }
+    </script>
+</body>
+</html>
+
