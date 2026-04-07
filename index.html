@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Repositorio de Proyectos</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>✨ Mi Archivo Digital</h1>
+        <p>Explora lo que he creado por fechas</p>
+    </header>
+
+    <div id="visor-publico" class="grid"></div>
+
+    <script src="script.js"></script>
+    <script>
+        const datos = obtenerDatos();
+        const visor = document.getElementById('visor-publico');
+        
+        datos.filter(p => p.visible)
+             .sort((a,b) => new Date(b.fecha) - new Date(a.fecha))
+             .forEach(p => {
+                visor.innerHTML += `
+                    <div class="card">
+                        <img src="${p.img}">
+                        <div class="card-body">
+                            <span style="color:var(--primary); font-weight:bold; font-size:0.8rem;">📅 ${p.fecha}</span>
+                            <h3 style="margin:10px 0;">${p.titulo}</h3>
+                            <p style="font-size:0.9rem; color:#666;">${p.desc}</p>
+                            <div style="margin-top:15px;">
+                                <a href="${p.repo}" target="_blank" class="btn btn-repo">📁 Archivo</a>
+                                <a href="${p.live}" target="_blank" class="btn btn-live">🚀 Ver</a>
+                            </div>
+                        </div>
+                    </div>`;
+             });
+    </script>
+</body>
+</html>
