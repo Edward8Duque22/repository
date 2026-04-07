@@ -1,41 +1,45 @@
-// Función para obtener datos
 function obtenerDatos() {
-    return JSON.parse(localStorage.getItem('repo_proyectos')) || [];
+    return JSON.parse(localStorage.getItem('mi_repo_vercel')) || [];
 }
 
-// Función para guardar datos
 function guardarDatos(datos) {
-    localStorage.setItem('repo_proyectos', JSON.stringify(datos));
+    localStorage.setItem('mi_repo_vercel', JSON.stringify(datos));
 }
 
-// Lógica para el Administrador
 function agregarProyecto() {
+    const titulo = document.getElementById('titulo').value;
+    const fecha = document.getElementById('fecha').value;
     const file = document.getElementById('foto').files[0];
-    if (!file) return alert("Selecciona una foto local");
+
+    if (!titulo || !fecha || !file) {
+        alert("Por favor completa título, fecha y selecciona una imagen.");
+        return;
+    }
 
     const reader = new FileReader();
     reader.onload = function(e) {
         const nuevo = {
             id: Date.now(),
-            titulo: document.getElementById('titulo').value,
-            fecha: document.getElementById('fecha').value,
+            titulo: titulo,
+            fecha: fecha,
             img: e.target.result,
-            repo: document.getElementById('repo').value,
-            live: document.getElementById('live').value,
-            desc: document.getElementById('desc').value,
+            repo: document.getElementById('repo').value || '#',
+            live: document.getElementById('live').value || '#',
+            desc: document.getElementById('desc').value || '',
             visible: true
         };
 
         const db = obtenerDatos();
         db.push(nuevo);
         guardarDatos(db);
-        location.reload(); // Recarga para mostrar cambios
+        alert("¡Proyecto guardado!");
+        window.location.href = 'index.html'; // Te lleva al inicio para ver el resultado
     };
     reader.readAsDataURL(file);
 }
 
 function eliminar(id) {
-    if(confirm("¿Seguro que quieres borrarlo?")) {
+    if(confirm("¿Seguro que quieres eliminar este archivo?")) {
         const db = obtenerDatos().filter(p => p.id !== id);
         guardarDatos(db);
         location.reload();
