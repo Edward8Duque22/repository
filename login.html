@@ -14,22 +14,25 @@
             <p>Ingresa tu clave maestra</p>
             <input type="password" id="clave" placeholder="Contraseña" autofocus>
             <button class="btn btn-live" style="width:100%;" onclick="validar()">Entrar</button>
-            <div style="margin-top:20px;"><a href="index.html" style="color:#999; text-decoration:none; font-size:0.9rem;">← Volver</a></div>
+            <div style="margin-top:20px;"><a href="index.html" style="color:#999; text-decoration:none;">← Volver</a></div>
         </div>
     </div>
 
     <script>
         function validar() {
             const pass = document.getElementById('clave').value;
-            const hashIngresado = CryptoJS.SHA256(pass).toString();
-            // Hash exacto para Neiva0228
+            if (!pass) return alert("Escribe la contraseña");
+            
+            // Hash generado para: Neiva0228
             const hashCorrecto = "71597797746409f7435f299103e6702c2f78508194411130d2204c35e4e89139";
+            const hashIngresado = CryptoJS.SHA256(pass).toString();
 
             if (hashIngresado === hashCorrecto) {
                 sessionStorage.setItem('sesion_activa', 'true');
                 window.location.href = 'admin.html';
             } else {
-                alert("Clave incorrecta ❌");
+                alert("Contraseña incorrecta ❌");
+                document.getElementById('clave').value = "";
             }
         }
     </script>
