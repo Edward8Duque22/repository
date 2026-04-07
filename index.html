@@ -2,40 +2,51 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Repositorio de Proyectos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Repositorio Digital</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <a href="admin.html" class="btn-admin-float" title="Administrar">⚙️</a>
+
     <header>
-        <h1>✨ Mi Archivo Digital</h1>
-        <p>Explora lo que he creado por fechas</p>
+        <h1>✨ Mi Archivo Creativo</h1>
+        <p>Proyectos organizados cronológicamente</p>
     </header>
 
-    <div id="visor-publico" class="grid"></div>
+    <main class="grid" id="visor-publico">
+        </main>
 
     <script src="script.js"></script>
     <script>
-        const datos = obtenerDatos();
-        const visor = document.getElementById('visor-publico');
-        
-        datos.filter(p => p.visible)
-             .sort((a,b) => new Date(b.fecha) - new Date(a.fecha))
-             .forEach(p => {
+        document.addEventListener('DOMContentLoaded', () => {
+            const datos = obtenerDatos();
+            const visor = document.getElementById('visor-publico');
+            
+            const publicos = datos.filter(p => p.visible)
+                                 .sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+
+            if(publicos.length === 0) {
+                visor.innerHTML = "<p style='text-align:center; grid-column:1/-1;'>Aún no hay proyectos públicos.</p>";
+            }
+
+            publicos.forEach(p => {
                 visor.innerHTML += `
                     <div class="card">
-                        <img src="${p.img}">
+                        <img src="${p.img}" alt="${p.titulo}">
                         <div class="card-body">
-                            <span style="color:var(--primary); font-weight:bold; font-size:0.8rem;">📅 ${p.fecha}</span>
-                            <h3 style="margin:10px 0;">${p.titulo}</h3>
-                            <p style="font-size:0.9rem; color:#666;">${p.desc}</p>
-                            <div style="margin-top:15px;">
-                                <a href="${p.repo}" target="_blank" class="btn btn-repo">📁 Archivo</a>
-                                <a href="${p.live}" target="_blank" class="btn btn-live">🚀 Ver</a>
+                            <span class="badge">📅 ${p.fecha}</span>
+                            <h3>${p.titulo}</h3>
+                            <p class="desc-text">${p.desc}</p>
+                            <div class="card-footer">
+                                <a href="${p.repo}" target="_blank" class="btn btn-repo">📁 Código</a>
+                                <a href="${p.live}" target="_blank" class="btn btn-live">🚀 Ver Demo</a>
                             </div>
                         </div>
                     </div>`;
-             });
+            });
+        });
     </script>
 </body>
 </html>
