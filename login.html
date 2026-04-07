@@ -2,32 +2,47 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Acceso Seguro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso Seguro - Mi Repo</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 </head>
 <body>
-    <div style="height: 100vh; display: flex; align-items: center; justify-content: center;">
-        <div class="box-form" style="margin: 0; width: 100%;">
-            <h2>🔐 Panel Privado</h2>
-            <p>Introduce tu clave maestra</p>
-            <input type="password" id="clave" placeholder="Contraseña">
-            <button class="btn btn-live" style="width: 100%;" onclick="entrar()">Entrar</button>
-            <br><br>
-            <a href="index.html" style="color: #999;">Volver al inicio</a>
+    <div style="height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;">
+        <div class="box-form" style="margin: 0; width: 100%; max-width: 400px;">
+            <h2 style="color: var(--primary);">🔐 Panel Privado</h2>
+            <p>Introduce la clave para gestionar tus proyectos</p>
+            <input type="password" id="clave" placeholder="Contraseña" autofocus>
+            <button class="btn btn-live" style="width: 100%; margin-top: 10px;" onclick="entrar()">Acceder</button>
+            <div style="margin-top: 20px;">
+                <a href="index.html" style="color: #999; text-decoration: none; font-size: 0.9rem;">← Volver al inicio</a>
+            </div>
         </div>
     </div>
 
     <script>
         function entrar() {
-            const clave = document.getElementById('clave').value;
-            if (clave === "200208*") { // <--- CAMBIA TU CLAVE AQUÍ
+            const claveIngresada = document.getElementById('clave').value;
+            
+            // Generamos el hash de lo que escribiste
+            const hashIngresado = CryptoJS.SHA256(claveIngresada).toString();
+
+            // Este es el hash de "Neiva0228"
+            const hashCorrecto = "3b0060019c4d922904719b48693c0422d3858066795498836585975097478051";
+
+            if (hashIngresado === hashCorrecto) {
                 sessionStorage.setItem('sesion_activa', 'true');
                 window.location.href = 'admin.html';
             } else {
-                alert("Clave incorrecta ❌");
+                alert("Clave incorrecta ❌. Intenta de nuevo.");
+                document.getElementById('clave').value = "";
             }
         }
+
+        // Permitir entrar con la tecla "Enter"
+        document.getElementById('clave').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') entrar();
+        });
     </script>
 </body>
 </html>
-
