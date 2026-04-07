@@ -2,51 +2,64 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel de Administración</title>
+    <title>Administrador - Mi Repo</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+    <script src="script.js"></script>
+    <script>verificarSesion();</script>
 </head>
 <body>
     <header>
-        <a href="index.html" style="float: left; color: white; text-decoration: none;">⬅ Volver</a>
-        <h1>🛠 Gestionar Repositorio</h1>
+        <button onclick="sessionStorage.clear(); location.reload();" style="float: right; padding: 10px; border-radius: 10px; border: none; cursor: pointer;">Cerrar 🔓</button>
+        <h1>🛠 Gestionar Archivo</h1>
     </header>
 
-    <section class="form-container">
-        <div class="form-group">
+    <div class="container">
+        <div class="box-form">
             <input type="text" id="titulo" placeholder="Título del proyecto">
             <input type="date" id="fecha">
-            <label>Imagen de portada (Local):</label>
-            <input type="file" id="foto" accept="image/*">
-            <input type="text" id="repo" placeholder="URL del Repositorio (GitHub/Drive)">
-            <input type="text" id="live" placeholder="URL del Proyecto (Nube)">
-            <textarea id="desc" placeholder="Descripción del proyecto..."></textarea>
-            <button class="btn-main" onclick="agregarProyecto()">🚀 Publicar en el Archivo</button>
+            <label style="font-size: 0.8rem; color: var(--primary);">Portada (Foto Local):</label>
+            <input type="file" id="foto-local" accept="image/*">
+            <input type="text" id="url-repo" placeholder="Link Repositorio (GitHub/Drive)">
+            <input type="text" id="url-live" placeholder="Link en la Nube (Demo)">
+            <textarea id="descripcion" placeholder="Descripción breve..."></textarea>
+            <button class="btn btn-live" style="width: 100%;" onclick="procesarNuevoProyecto()">🚀 Publicar Ahora</button>
         </div>
-    </section>
 
-    <h2 style="text-align: center;">Tus Publicaciones</h2>
-    <div id="lista-admin" class="grid"></div>
+        <h2 style="text-align: center;">Tus Publicaciones</h2>
+        <div id="lista-admin" class="grid" style="margin-top: 20px;"></div>
+    </div>
 
-    <script src="script.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const datos = obtenerDatos();
-            const lista = document.getElementById('lista-admin');
-            
-            datos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(p => {
-                lista.innerHTML += `
-                    <div class="card ${p.visible ? '' : 'hidden-card'}">
-                        <img src="${p.img}">
-                        <div class="card-body">
-                            <h3>${p.titulo}</h3>
-                            <div class="admin-actions">
-                                <button class="btn-toggle" onclick="toggleVisible(${p.id})">${p.visible ? 'Ocultar 👁️' : 'Mostrar 🕶️'}</button>
-                                <button class="btn-delete" onclick="eliminar(${p.id})">Borrar 🗑️</button>
-                            </div>
-                        </div>
-                    </div>`;
+        const lista = document.getElementById('lista-admin');
+        const proyectos = obtenerProyectos();
+
+        function toggle(id) {
+            const db = obtenerProyectos().map(p => {
+                if(p.id === id) p.visible = !p.visible;
+                return p;
             });
+            guardarProyectos(db);
+            location.reload();
+        }
+
+        function borrar(id) {
+            if(confirm("¿Borrar permanentemente?")) {
+                const db = obtenerProyectos().filter(p => p.id !== id);
+                guardarProyectos(db);
+                location.reload();
+            }
+        }
+
+        proyectos.sort((a,b) => new Date(b.fecha) - new Date(a.fecha)).forEach(p => {
+            lista.innerHTML += `
+                <div class="card" style="opacity: ${p.visible ? '1' : '0.5'}">
+                    <img src="${p.img}">
+                    <div class="card-body">
+                        <h3>${p.titulo}</h3>
+                        <button onclick="toggle(${p.id})">${p.visible ? 'Ocultar 👁️' : 'Mostrar 🕶️'}</button>
+                        <button onclick="borrar(${p.id})" style="color:red; margin-left:10px;">Borrar 🗑️</button>
+                    </div>
+                </div>`;
         });
     </script>
 </body>
