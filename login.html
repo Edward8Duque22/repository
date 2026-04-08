@@ -3,38 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso Seguro</title>
+    <title>Acceso — Archivo Creativo</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+        .spinner {
+            display: inline-block;
+            width: 14px; height: 14px;
+            border: 2px solid #0d0e1255;
+            border-top-color: #0d0e12;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .auth-grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 48px 48px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .password-wrap {
+            position: relative;
+        }
+
+        .password-wrap input { padding-right: 44px; }
+
+        .toggle-pass {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 14px;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+        .toggle-pass:hover { color: var(--text); }
+
+        .enter-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.82rem;
+            letter-spacing: 0.06em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-family: 'DM Mono', monospace;
+            font-size: 0.7rem;
+            letter-spacing: 0.05em;
+            margin-top: 20px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--text); }
+
+        .session-notice {
+            font-family: 'DM Mono', monospace;
+            font-size: 0.62rem;
+            color: var(--text-faint);
+            text-align: center;
+            margin-top: 28px;
+            letter-spacing: 0.04em;
+        }
+    </style>
 </head>
 <body>
-    <div class="full-center">
-        <div class="box-form">
-            <h2>🔐 Panel Privado</h2>
-            <p>Ingresa tu clave maestra</p>
-            <input type="password" id="clave" placeholder="Contraseña" autofocus>
-            <button class="btn btn-live" style="width:100%;" onclick="validar()">Entrar</button>
-            <div style="margin-top:20px;"><a href="index.html" style="color:#999; text-decoration:none;">← Volver</a></div>
+<div class="auth-wrapper">
+
+    <!-- Panel izquierdo — presentación -->
+    <div class="auth-left">
+        <div class="auth-grid-bg"></div>
+
+        <div class="auth-brand">
+            <div class="logo-mark">📁</div>
+            <span>Archivo Creativo</span>
+        </div>
+
+        <div class="auth-tagline">
+            <h2>Tu repositorio,<br>tu <em style="color:var(--accent)">espacio</em>.</h2>
+            <p>Panel de administración privado. Gestiona, publica y organiza todos tus proyectos desde un solo lugar.</p>
+        </div>
+
+        <div class="auth-decoration">ACCESO RESTRINGIDO · SOLO ADMINISTRADORES</div>
+    </div>
+
+    <!-- Panel derecho — formulario -->
+    <div class="auth-right">
+        <div class="auth-form-box">
+            <h3>Iniciar sesión</h3>
+            <p class="subtitle">Ingresa tu contraseña para continuar al panel.</p>
+
+            <div id="form-error" class="error-msg"></div>
+
+            <div class="field">
+                <label for="clave">Contraseña</label>
+                <div class="password-wrap">
+                    <input
+                        type="password"
+                        id="clave"
+                        placeholder="••••••••••"
+                        autofocus
+                        onkeydown="if(event.key==='Enter') validar()"
+                    >
+                    <button class="toggle-pass" onclick="togglePassword()" type="button" id="toggle-icon" title="Mostrar/ocultar">👁</button>
+                </div>
+            </div>
+
+            <button class="btn btn-accent enter-btn" id="login-btn" onclick="validar()">
+                Entrar al panel
+            </button>
+
+            <a href="index.html" class="back-link">← Volver al repositorio</a>
+
+            <p class="session-notice">La sesión se cerrará al cerrar el navegador.</p>
         </div>
     </div>
 
-    <script>
-        function validar() {
-            const pass = document.getElementById('clave').value;
-            if (!pass) return alert("Escribe la contraseña");
+</div>
 
-            
-            const hashCorrecto = "c0e1cd8fc8386315b37205f95cd4918b8820715968f4b0c6bd910ce0c78045ba";
+<script>
+    function togglePassword() {
+        const input = document.getElementById('clave');
+        const icon  = document.getElementById('toggle-icon');
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.textContent = '🙈';
+        } else {
+            input.type = 'password';
+            icon.textContent = '👁';
+        }
+    }
+
+    function validar() {
+        const pass    = document.getElementById('clave').value;
+        const errorEl = document.getElementById('form-error');
+        const btn     = document.getElementById('login-btn');
+
+        errorEl.classList.remove('show');
+
+        if (!pass) {
+            errorEl.textContent = 'Por favor ingresa tu contraseña.';
+            errorEl.classList.add('show');
+            return;
+        }
+
+        // Estado de carga
+        btn.innerHTML = '<span class="spinner"></span> Verificando…';
+        btn.disabled = true;
+
+        setTimeout(() => {
+            const hashCorrecto  = "c0e1cd8fc8386315b37205f95cd4918b8820715968f4b0c6bd910ce0c78045ba";
             const hashIngresado = CryptoJS.SHA256(pass).toString();
 
             if (hashIngresado === hashCorrecto) {
                 sessionStorage.setItem('sesion_activa', 'true');
                 window.location.href = 'admin.html';
             } else {
-                alert("Contraseña incorrecta ❌");
-                document.getElementById('clave').value = "";
+                errorEl.textContent = 'Contraseña incorrecta. Intenta de nuevo.';
+                errorEl.classList.add('show');
+                document.getElementById('clave').value = '';
+                document.getElementById('clave').focus();
+                btn.innerHTML = 'Entrar al panel';
+                btn.disabled  = false;
             }
-        }
-    </script>
+        }, 600);
+    }
+</script>
 </body>
 </html>

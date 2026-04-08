@@ -2,52 +2,195 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Administración</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración — Archivo Creativo</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
-    <script>if(!sessionStorage.getItem('sesion_activa')) window.location.href='login.html';</script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <script>
+        if (!sessionStorage.getItem('sesion_activa')) window.location.href = 'login.html';
+    </script>
 </head>
 <body>
-    <header>
-        <button onclick="sessionStorage.clear(); window.location.href='index.html';" style="float:right; padding:10px; border-radius:10px; cursor:pointer; border:none;">Salir 🔓</button>
-        <h1>🛠 Administrar Repositorio</h1>
-    </header>
 
-    <div class="container">
-        <div class="box-form">
-            <h3>Subir Nuevo Archivo</h3>
-            <input type="text" id="titulo" placeholder="Título del proyecto">
-            <input type="date" id="fecha">
-            <label style="font-size:0.8rem; color:var(--primary);">Imagen Portada:</label>
-            <input type="file" id="foto" accept="image/*">
-            <input type="text" id="repo" placeholder="Link Repositorio">
-            <input type="text" id="live" placeholder="Link Demo">
-            <textarea id="desc" placeholder="Descripción breve..."></textarea>
-            <button class="btn btn-live" style="width:100%;" onclick="agregarProyecto()">🚀 Publicar Ahora</button>
+<!-- HEADER -->
+<header>
+    <div class="header-brand">
+        <div class="logo-mark">🛠</div>
+        <div>
+            <h1>Panel de Administración</h1>
+            <p>ARCHIVO CREATIVO</p>
+        </div>
+    </div>
+    <div class="header-right">
+        <a href="index.html" class="btn btn-ghost">← Ver repositorio</a>
+        <button class="btn btn-danger" onclick="cerrarSesion()">Salir 🔓</button>
+    </div>
+</header>
+
+<!-- LAYOUT PRINCIPAL -->
+<div class="admin-layout">
+
+    <!-- SIDEBAR: Formulario de nuevo proyecto -->
+    <aside class="admin-sidebar">
+        <h2>Nuevo Proyecto</h2>
+
+        <div id="form-error" class="error-msg"></div>
+
+        <div class="field">
+            <label for="titulo">Título del proyecto</label>
+            <input type="text" id="titulo" placeholder="Ej: Landing page para startup">
         </div>
 
-        <h2 style="text-align:center;">Gestionar Publicaciones</h2>
-        <div id="lista-admin" class="grid"></div>
-    </div>
+        <div class="field">
+            <label for="fecha">Fecha</label>
+            <input type="date" id="fecha">
+        </div>
 
-    <script>
-        function cargarAdmin() {
-            const lista = document.getElementById('lista-admin');
-            const proyectos = obtenerProyectos().sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
-            lista.innerHTML = '';
-            proyectos.forEach(p => {
-                lista.innerHTML += `
-                    <div class="card" style="opacity:${p.visible ? '1' : '0.5'}">
-                        <img src="${p.img}">
-                        <div class="card-body">
-                            <h4>${p.titulo}</h4>
-                            <button onclick="toggleVisible(${p.id})">${p.visible ? 'Ocultar 👁️' : 'Mostrar 🕶️'}</button>
-                            <button onclick="eliminarProyecto(${p.id})" style="color:red; margin-left:10px; border:none; background:none; cursor:pointer;">Borrar 🗑️</button>
-                        </div>
-                    </div>`;
-            });
+        <div class="field">
+            <label>Imagen de portada</label>
+            <div class="file-upload" onclick="document.getElementById('foto').click()">
+                <input type="file" id="foto" accept="image/*" onchange="mostrarNombreArchivo(this)">
+                <div class="file-upload-label">
+                    <div style="font-size:1.4rem; margin-bottom:6px;">🖼️</div>
+                    <span id="file-name"><strong>Clic para seleccionar</strong><br>PNG, JPG o GIF</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="repo">Link repositorio</label>
+            <input type="url" id="repo" placeholder="https://github.com/...">
+        </div>
+
+        <div class="field">
+            <label for="live">Link demo en vivo</label>
+            <input type="url" id="live" placeholder="https://mi-proyecto.com">
+        </div>
+
+        <div class="field">
+            <label for="desc">Descripción breve</label>
+            <textarea id="desc" placeholder="¿De qué trata este proyecto?..."></textarea>
+        </div>
+
+        <button class="btn btn-accent" style="width:100%; padding:13px; font-size:0.8rem;" onclick="agregarProyecto()">
+            🚀 Publicar proyecto
+        </button>
+
+        <div class="divider"></div>
+
+        <!-- STATS -->
+        <div id="sidebar-stats" style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text-muted);line-height:2;">
+        </div>
+    </aside>
+
+    <!-- MAIN: Gestión de publicaciones -->
+    <main class="admin-main">
+        <h2>
+            Publicaciones
+            <span id="total-badge" style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-muted);font-weight:400;"></span>
+        </h2>
+
+        <div style="display:flex; gap:8px; margin-bottom:20px;">
+            <button class="chip active" onclick="setFiltroAdmin('todos', this)">Todos</button>
+            <button class="chip" onclick="setFiltroAdmin('visible', this)">Visibles</button>
+            <button class="chip" onclick="setFiltroAdmin('ocultos', this)">Ocultos</button>
+        </div>
+
+        <div id="lista-admin"></div>
+    </main>
+
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast"></div>
+
+<script src="script.js"></script>
+<script>
+    let filtroAdmin = 'todos';
+
+    function cerrarSesion() {
+        if (confirm('¿Cerrar sesión?')) {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
         }
-        document.addEventListener('DOMContentLoaded', cargarAdmin);
-    </script>
+    }
+
+    function mostrarNombreArchivo(input) {
+        const label = document.getElementById('file-name');
+        if (input.files && input.files[0]) {
+            label.innerHTML = `<strong>${input.files[0].name}</strong>`;
+        }
+    }
+
+    function setFiltroAdmin(tipo, el) {
+        filtroAdmin = tipo;
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        cargarAdmin();
+    }
+
+    function cargarAdmin() {
+        const lista = document.getElementById('lista-admin');
+        const stats = document.getElementById('sidebar-stats');
+        const badge = document.getElementById('total-badge');
+
+        let todos = obtenerProyectos().sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        const visibles = todos.filter(p => p.visible).length;
+        const ocultos  = todos.filter(p => !p.visible).length;
+
+        badge.textContent = `${todos.length} total`;
+
+        stats.innerHTML = `
+            <span style="color:var(--success)">● ${visibles} visible${visibles !== 1 ? 's' : ''}</span><br>
+            <span>○ ${ocultos} oculto${ocultos !== 1 ? 's' : ''}</span><br>
+            <span>📦 ${todos.length} total</span>
+        `;
+
+        let proyectos = todos;
+        if (filtroAdmin === 'visible') proyectos = todos.filter(p => p.visible);
+        if (filtroAdmin === 'ocultos') proyectos = todos.filter(p => !p.visible);
+
+        if (proyectos.length === 0) {
+            lista.innerHTML = `
+                <div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+                    <div style="font-size:2rem;margin-bottom:12px;opacity:0.3;">📂</div>
+                    <p style="font-family:'DM Mono',monospace;font-size:0.75rem;">
+                        No hay proyectos en esta categoría.
+                    </p>
+                </div>`;
+            return;
+        }
+
+        lista.innerHTML = proyectos.map(p => {
+            const fecha = new Date(p.fecha + 'T00:00:00').toLocaleDateString('es-CO', {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
+            return `
+            <div class="admin-card ${p.visible ? '' : 'hidden-project'}">
+                <div class="admin-card-thumb">
+                    <img src="${p.img}" alt="${p.titulo}">
+                </div>
+                <div class="admin-card-info">
+                    <h4>${p.titulo}</h4>
+                    <span class="meta">
+                        <span class="status-dot ${p.visible ? '' : 'off'}"></span>
+                        ${p.visible ? 'Visible' : 'Oculto'} · ${fecha}
+                    </span>
+                </div>
+                <div class="admin-card-actions">
+                    <button class="btn btn-ghost" onclick="toggleVisible(${p.id})" title="${p.visible ? 'Ocultar' : 'Mostrar'}">
+                        ${p.visible ? '👁 Ocultar' : '🕶️ Mostrar'}
+                    </button>
+                    <button class="btn btn-danger" onclick="eliminarProyecto(${p.id})" title="Eliminar">
+                        🗑️
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', cargarAdmin);
+</script>
 </body>
 </html>

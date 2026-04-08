@@ -3,50 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Repositorio Digital</title>
+    <title>Archivo Creativo — Repositorio</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>✨ Mi Archivo Creativo</h1>
-        <p>Proyectos y creaciones organizados por fecha</p>
-    </header>
 
-    <div class="container">
-        <main class="grid" id="visor-publico"></main>
+<!-- HEADER -->
+<header>
+    <div class="header-brand">
+        <div class="logo-mark">📁</div>
+        <div>
+            <h1>Archivo Creativo</h1>
+            <p>REPOSITORIO PERSONAL</p>
+        </div>
     </div>
+    <div class="header-right">
+        <span id="header-count" style="font-family:'DM Mono',monospace;font-size:0.7rem;color:var(--text-muted);"></span>
+    </div>
+</header>
 
-    <a href="login.html" class="admin-access" title="Admin">⚙️</a>
+<!-- HERO -->
+<div class="hero">
+    <div class="hero-tag">Proyectos</div>
+    <h2>Mis <em>creaciones</em><br>y trabajo.</h2>
+    <p>Una colección de proyectos organizados por fecha — código, diseño y todo lo que vale la pena guardar.</p>
+</div>
 
-    <script src="script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const visor = document.getElementById('visor-publico');
-            const proyectos = obtenerProyectos();
-            const publicos = proyectos.filter(p => p.visible).sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+<!-- TOOLBAR -->
+<div class="toolbar">
+    <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="buscador" placeholder="Buscar proyecto..." oninput="filtrar()">
+    </div>
+    <button class="chip active" onclick="setFiltro('todos', this)">Todos</button>
+    <button class="chip" onclick="setFiltro('recientes', this)">Este año</button>
+    <button class="chip" onclick="setFiltro('anteriores', this)">Anteriores</button>
+    <span class="toolbar-count" id="count-label"></span>
+</div>
 
-            if(publicos.length === 0) {
-                visor.innerHTML = "<p style='text-align:center; grid-column:1/-1; opacity:0.5;'>Aún no hay proyectos públicos.</p>";
-                return;
-            }
+<!-- GRID -->
+<div style="padding: 0 0 60px;">
+    <div class="grid" id="visor-publico"></div>
+</div>
 
-            publicos.forEach(p => {
-                visor.innerHTML += `
-                    <div class="card">
-                        <img src="${p.img}" alt="Portada">
-                        <div class="card-body">
-                            <span class="badge">📅 ${p.fecha}</span>
-                            <h3>${p.titulo}</h3>
-                            <p class="desc">${p.desc}</p>
-                            <div class="card-links">
-                                <a href="${p.repo}" target="_blank" class="btn btn-repo">📁 Código</a>
-                                <a href="${p.live}" target="_blank" class="btn btn-live">🚀 Ver Demo</a>
-                            </div>
-                        </div>
-                    </div>`;
+<!-- Acceso admin discreto -->
+<a href="login.html" class="admin-access" title="Administrar">⚙️</a>
+
+<script src="script.js"></script>
+<script>
+    let filtroActivo = 'todos';
+    let terminoBusqueda = '';
+
+    function setFiltro(tipo, el) {
+        filtroActivo = tipo;
+        document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        el.classList.add('active');
+        renderizar();
+    }
+
+    function filtrar() {
+        terminoBusqueda = document.getElementById('buscador').value.toLowerCase();
+        renderizar();
+    }
+
+    function renderizar() {
+        const visor = document.getElementById('visor-publico');
+        const countLabel = document.getElementById('count-label');
+        const headerCount = document.getElementById('header-count');
+
+        let proyectos = obtenerProyectos()
+            .filter(p => p.visible)
+            .sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+        const totalPublicos = proyectos.length;
+        headerCount.textContent = `${totalPublicos} proyecto${totalPublicos !== 1 ? 's' : ''}`;
+
+        const anioActual = new Date().getFullYear();
+
+        if (filtroActivo === 'recientes') {
+            proyectos = proyectos.filter(p => new Date(p.fecha).getFullYear() === anioActual);
+        } else if (filtroActivo === 'anteriores') {
+            proyectos = proyectos.filter(p => new Date(p.fecha).getFullYear() < anioActual);
+        }
+
+        if (terminoBusqueda) {
+            proyectos = proyectos.filter(p =>
+                p.titulo.toLowerCase().includes(terminoBusqueda) ||
+                (p.desc && p.desc.toLowerCase().includes(terminoBusqueda))
+            );
+        }
+
+        countLabel.textContent = `${proyectos.length} resultado${proyectos.length !== 1 ? 's' : ''}`;
+
+        if (proyectos.length === 0) {
+            visor.innerHTML = `
+                <div class="empty-state">
+                    <div class="big-icon">📂</div>
+                    <p>No hay proyectos que coincidan.</p>
+                </div>`;
+            return;
+        }
+
+        visor.innerHTML = proyectos.map(p => {
+            const fecha = new Date(p.fecha + 'T00:00:00').toLocaleDateString('es-CO', {
+                year: 'numeric', month: 'short', day: 'numeric'
             });
-        });
-    </script>
+            const tieneRepo = p.repo && p.repo !== '#';
+            const tieneDemo = p.live && p.live !== '#';
+
+            return `
+            <div class="card">
+                <div class="card-thumb">
+                    <img src="${p.img}" alt="${p.titulo}">
+                    <div class="card-thumb-overlay">
+                        ${tieneRepo ? `<a href="${p.repo}" target="_blank" class="btn btn-ghost">📁 Código</a>` : ''}
+                        ${tieneDemo ? `<a href="${p.live}" target="_blank" class="btn btn-accent">🚀 Demo</a>` : ''}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="card-meta">
+                        <span>${fecha}</span>
+                    </div>
+                    <h3>${p.titulo}</h3>
+                    ${p.desc ? `<p class="desc">${p.desc}</p>` : ''}
+                    <div class="card-links">
+                        ${tieneRepo ? `<a href="${p.repo}" target="_blank" class="btn btn-ghost">📁 Código</a>` : ''}
+                        ${tieneDemo ? `<a href="${p.live}" target="_blank" class="btn btn-accent">🚀 Ver Demo</a>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', renderizar);
+</script>
 </body>
 </html>
